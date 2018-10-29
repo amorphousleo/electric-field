@@ -1,0 +1,177 @@
+######
+# Electric Field Calculation
+# Input QE structure and calculate electric field
+# over a series of points on a 3-D grid
+######
+import math
+import numpy as np
+import matplotlib.pyplot as plt
+import time
+######
+# Inputs that maybe changed for simulation
+######
+# First we need to define the lattice length
+# next multiply by the a constant to convert to angstrom
+# atom_num is number of atoms in simulation
+filename = 'sep23.1_final_structure_efield'
+alat = 29.00
+alat_ang = alat*0.529
+atom_num = 256
+
+# Inner and outer cutoff define the range of the Columb potential
+# We have an inner cutoff to ignore self field
+cutoff_out = 3.0
+cutoff_in  = 1.0
+
+# lattice lengths a for x, b for y, c for z
+a = 15.341
+b = 15.341
+c = 15.341
+######
+# Define constants for simulation
+######
+
+# Coulumb Constant : Units : N m^2 C^-2
+colum = 9.0*10**29
+e2 = (1.602*10**-19)**2
+
+print("Number of Atoms for Calcululation:",atom_num)
+print("Done With Variables")
+######
+# Create all empty lists
+######
+xpos,ypos,zpos,atom,axpos,aypos,azpos,aatom,charge = ([] for i in range(9))
+xtemp,ytemp,ztemp,xfield,yfield,zfield,etemp,efield,i,j,k,text = ([] for i in range(12))
+
+######
+# Input the structure
+######
+with open("sep23.1_final_structure", "rt") as fin:
+    with open("atom_pos_temp", "wt") as fout: 
+        for line in fin: 
+            fout.write((line.replace('Pt', '1')).replace('Ni','2').replace('P','3'))
+    
+with open('atom_pos_temp') as f:
+    lines = f.read().split()
+
+n = 1
+while n < (atom_num*4):
+    atom.append(lines[n-1])
+    xpos.append(float(lines[n]))
+    ypos.append(float(lines[n+1]))
+    zpos.append(float(lines[n+2]))
+    n += 4
+
+######
+# Now make a list of charges for each atom
+######
+n = 0
+while n < atom_num:
+    if float(atom[n]) == 1:
+        charge.append(78)
+    if float(atom[n]) == 2:
+        charge.append(28)
+    if float(atom[n]) == 3:
+        charge.append(15)
+    n += 1
+print("Done  With Charges and Lists")
+#####
+# Beginning of Indicie List
+#####
+
+# We can calculate new x2, y2 and z2 values 
+# Now make a list of all possible combinations
+
+indicies = [0,0,0,1,0,0,0,1,0,0,0,1,1,1,0,1,0,1,0,1,1,1,1,1]
+#all negative indicies
+indicies.extend([-1,0,0,0,-1,0,0,0,-1,-1,-1,0,-1,0,-1,0,-1,-1,-1,-1,-1])
+# now we need mixed indicies 
+indicies.extend([-1,-1,1,-1,1,-1,1,-1,-1])
+indicies.extend([-1,1,1,1,-1,1,1,1,-1])
+indicies.extend([0,-1,1,0,1,-1,-1,0,1,-1,1,0])
+   
+n = 0  
+while n < 75:
+    # print(str(indicies[n])+' '+str(indicies[n+1])+' '+str(indicies[n+2]))
+    i.append(indicies[n])
+    j.append(indicies[n+1])
+    k.append(indicies[n+2])
+    n += 3
+    
+#####
+# END OF INDICIE LIST
+#####
+
+# Now do distance calculation changing x2, y2 and z2 based on i, j and k indicies 
+# We need multiple loops to execute the distance calculation
+# outermost loop is to range over atoms r 
+# next loop over atoms m
+# final loop is to calculate atom m + images
+ 
+x = np.arange(0,15.341,.192)
+y = np.arange(0,15.341,.192)
+z = np.arange(0,15.341,.192)
+check_list = []
+
+print("Done with Indicies and Arrangement")
+
+l = 0
+# x-loop
+while l < len(x):
+    # x-loop
+    m = 0
+    while m < len(y):
+        # y-loop
+        n = 0
+        while n < len(z):
+            # z-loop
+            o = 0
+            while o <= (atom_num-1):
+                # atom-loop
+                p = 0
+                while p < 25:
+                    #periodic images loop
+                    x1 = xpos[o]
+                    y1 = ypos[o]
+                    z1 = zpos[o]
+                    x2 = x[l]
+                    y2 = y[m]
+                    z2 = z[n]
+                    dist_image = np.sqrt((x1-x2)**2 + (y1-y2)**2 + (z1-z2)**2)
+                    if dist_image < cutoff_out and dist_image > cutoff_in:
+                        etemp.append((colum*e2*charge[o])/((zpos[o]-z[n])**2))
+                        check_list.append(1)
+                    p += 1
+                o += 1
+            # Before we move to new coordinate 
+            # sum up etemp values to efield
+            if len(etemp) != 0:
+                efield.append(np.sum(etemp))
+                etemp = []
+            else:
+                efield.append(0)
+            n += 1
+        m += 1
+    print((1.25*l+1.25),"% Complete!:")
+    l += 1
+    
+######
+# End of the Calculation
+######
+
+######
+# Write out lines to file from efield
+######
+
+n = 0
+while n < len(efield):
+    text.append(str(efield[n]))
+    n += 1 
+
+#filename defined at top
+
+with open(filename, 'w') as f:
+    for row in text:
+        file.write("%s\n" % str(row))
+        
+file.close()
