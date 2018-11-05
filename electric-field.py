@@ -11,7 +11,7 @@ import pymatgen as pmg
 import numpy as np
 import numba
 
-
+# Constants Section 
 # Coulumb Constant : Units : N m^2 C^-2
 COLUMB = 9.0*10**29
 E2 = (1.602*10**-19)**2
