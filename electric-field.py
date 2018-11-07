@@ -67,7 +67,7 @@ def _calculate_electric_field(centered_coordinates, inner_cutoff_radius, grid_in
         for index in indicies:
             dist = np.linalg.norm(grid_point - centered_coordinates[index])
             if dist > inner_cutoff_radius:
-                grid_efield[i] += COLUMB * E2 * charges[index] / dist
+                grid_efield[i] += COLUMB * E2 * charges[index] / (dist*dist)
     return grid_efield
 
 
