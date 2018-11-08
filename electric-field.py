@@ -31,16 +31,7 @@ def read_structure(filename, lattice, charges):
     structure.add_oxidation_state_by_element(charges)
     return structure
 
-def calculate_electric_field(structure, inner_cutoff=1.0, outer_cutoff=3.0, grid=(10, 10, 10)):
-    """ Pesudo code
-
-    for each position:
-        for each atom:
-            dist = calculate distance between atoms
-            if dist within cutoffs:
-                 calculate electric field contribution
-            efield_total = sum efields contributions
-    """
+def calculate_electric_field(structure, inner_cutoff=1.0, outer_cutoff=3.0, grid=(80, 80, 80)):
     x_p = np.linspace(0, structure.lattice.a, grid[0])
     y_p = np.linspace(0, structure.lattice.b, grid[0])
     z_p = np.linspace(0, structure.lattice.c, grid[0])
@@ -66,7 +57,7 @@ def _calculate_electric_field(centered_coordinates, inner_cutoff_radius, grid_in
     for i, (indicies, grid_point) in enumerate(zip(grid_indicies, grid_points)):
         for index in indicies:
             dist = np.linalg.norm(grid_point - centered_coordinates[index])
-            if dist > inner_cutoff_radius:
+            if dist > inner_cutoff_radius and outer_cutoff_radius > dist:
                 grid_efield[i] += COLUMB * E2 * charges[index] / (dist*dist)
     return grid_efield
 
