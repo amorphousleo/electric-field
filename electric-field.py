@@ -40,7 +40,7 @@ def calculate_electric_field(structure, inner_cutoff=1.0, outer_cutoff=3.0, grid
     supercell_structure = structure * (3, 3, 3)
     offset = np.array([structure.lattice.a, structure.lattice.b, structure.lattice.c])
     centered_coordinates = supercell_structure.cart_coords  - offset # np array of all coordinates
-
+    np.save('data/results/centered_coordinates.npy', centered_coordinates)
     charges = np.array([getattr(site.specie, "oxi_state", 0) for site in supercell_structure])
 
     from scipy.spatial import cKDTree
