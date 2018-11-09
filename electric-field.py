@@ -38,6 +38,8 @@ def calculate_electric_field(structure, inner_cutoff=1.0, outer_cutoff=3.0, grid
     grid_points = np.vstack(np.meshgrid(x_p,y_p,z_p)).reshape(3,-1).T
 
     supercell_structure = structure * (3, 3, 3)
+    np.save('data/results/supercell_structure.npy', supercell_structure.cart_coords)
+    np.save('data/results/structure.npy', structure.cart_coords)
     offset = np.array([structure.lattice.a, structure.lattice.b, structure.lattice.c])
     centered_coordinates = supercell_structure.cart_coords  - offset # np array of all coordinates
     np.save('data/results/centered_coordinates.npy', centered_coordinates)
