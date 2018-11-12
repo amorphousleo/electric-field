@@ -65,7 +65,7 @@ def _calculate_electric_field(centered_coordinates, inner_cutoff_radius, grid_in
 
 
 if __name__ == "__main__":
-    input_filename = "data/input/sep23.1_final_structure"
+    input_filename = "data/input/sep23.1_final_structure_new"
     a, b, c = 15.341, 15.341, 15.341
 
     # Inner and outer cutoff define the range of the Columb potential
