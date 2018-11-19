@@ -56,7 +56,6 @@ def calculate_electric_field(structure, inner_cutoff=1.0, outer_cutoff=3.0, grid
 @numba.jit
 def _calculate_electric_field(centered_coordinates, inner_cutoff_radius, grid_indicies, grid_points, charges):
     grid_efield = np.zeros(len(grid_points))
-    x_efield,y_efield,z_efield =
     for i, (indicies, grid_point) in enumerate(zip(grid_indicies, grid_points)):
         for index in indicies:
             dist = np.linalg.norm(grid_point - centered_coordinates[index])
