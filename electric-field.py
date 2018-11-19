@@ -49,20 +49,20 @@ def calculate_electric_field(structure, inner_cutoff=1.0, outer_cutoff=3.0, grid
     kdtree = cKDTree(centered_coordinates)
     grid_indicies = kdtree.query_ball_point(grid_points, outer_cutoff_radius)
 
-    grid_efield = _calculate_electric_field(centered_coordinates, inner_cutoff_radius, grid_indicies, grid_points, charges)
-    return grid_efield, grid_points
+    atom_efield = _calculate_electric_field(centered_coordinates, inner_cutoff_radius, grid_indicies, charges)
+    return atom_efield, grid_points
 
 
 @numba.jit
 def _calculate_electric_field(centered_coordinates, inner_cutoff_radius, grid_indicies, grid_points, charges):
-    grid_efield = np.zeros(len(grid_points))
+    atom_efield = np.zeros(len(grid_points))
+    print(len(structure.cart_coords))
     for i, (indicies, grid_point) in enumerate(zip(grid_indicies, grid_points)):
         for index in indicies:
             dist = np.linalg.norm(grid_point - centered_coordinates[index])
             if dist > inner_cutoff_radius and outer_cutoff_radius > dist:
-                grid_efield[i] += COLUMB * E2 * charges[index] / (dist*dist)
-                
-    return grid_efield
+                atom_efield[i] += COLUMB * E2 * charges[index] / (dist*dist)                
+    return atom_efield
 
 
 if __name__ == "__main__":
@@ -80,7 +80,7 @@ if __name__ == "__main__":
     structure = read_structure(input_filename, lattice, charges)
 
     grid_size = (80, 80, 80)
-    grid_efield, grid_points = calculate_electric_field(structure, inner_cutoff_radius, outer_cutoff_radius, grid=grid_size)
+    atom_efield, grid_points = calculate_electric_field(structure, inner_cutoff_radius, outer_cutoff_radius, grid=grid_size)
 
-    np.save('data/results/grid_efield.npy', grid_efield)
+    np.save('data/results/atom_efield.npy', atom_efield)
     np.save('data/results/grid_points.npy', grid_points)
