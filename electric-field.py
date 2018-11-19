@@ -56,11 +56,13 @@ def calculate_electric_field(structure, inner_cutoff=1.0, outer_cutoff=3.0, grid
 @numba.jit
 def _calculate_electric_field(centered_coordinates, inner_cutoff_radius, grid_indicies, grid_points, charges):
     grid_efield = np.zeros(len(grid_points))
+    x_efield,y_efield,z_efield =
     for i, (indicies, grid_point) in enumerate(zip(grid_indicies, grid_points)):
         for index in indicies:
             dist = np.linalg.norm(grid_point - centered_coordinates[index])
             if dist > inner_cutoff_radius and outer_cutoff_radius > dist:
                 grid_efield[i] += COLUMB * E2 * charges[index] / (dist*dist)
+                
     return grid_efield
 
 
@@ -71,11 +73,11 @@ if __name__ == "__main__":
     # Inner and outer cutoff define the range of the Columb potential
     # We have an inner cutoff to ignore self field
     inner_cutoff_radius = 1.0
-    outer_cutoff_radius = 3.0
+    outer_cutoff_radius = 3.0  
 
     # Construct Structure
     lattice = pmg.Lattice.from_parameters(a, b, c, 90, 90, 90)
-    charges = {'Pt': 78.0, 'Ni': 28.0, 'P': 15.0}
+    charges = {'Pt': 10, 'Ni': 10, 'P': 5}
     structure = read_structure(input_filename, lattice, charges)
 
     grid_size = (80, 80, 80)
