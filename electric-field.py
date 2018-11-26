@@ -31,38 +31,31 @@ def read_structure(filename, lattice, charges):
     structure.add_oxidation_state_by_element(charges)
     return structure
 
-def calculate_electric_field(structure, inner_cutoff=1.0, outer_cutoff=3.0, grid=(80, 80, 80)):
-    x_p = np.linspace(0, structure.lattice.a, grid[0])
-    y_p = np.linspace(0, structure.lattice.b, grid[0])
-    z_p = np.linspace(0, structure.lattice.c, grid[0])
-    grid_points = np.vstack(np.meshgrid(x_p,y_p,z_p)).reshape(3,-1).T
+def calculate_electric_field(structure, inner_cutoff=1.0, outer_cutoff=3.0):
 
     supercell_structure = structure * (3, 3, 3)
     np.save('data/results/supercell_structure.npy', supercell_structure.cart_coords)
     np.save('data/results/structure.npy', structure.cart_coords)
-    offset = np.array([structure.lattice.a, structure.lattice.b, structure.lattice.c])
-    centered_coordinates = supercell_structure.cart_coords  - offset # np array of all coordinates
-    np.save('data/results/centered_coordinates.npy', centered_coordinates)
+    coordinates = supercell_structure.cart_coords  # np array of all coordinates
+    np.save('data/results/coordinates.npy', coordinates)
     charges = np.array([getattr(site.specie, "oxi_state", 0) for site in supercell_structure])
 
     from scipy.spatial import cKDTree
-    kdtree = cKDTree(centered_coordinates)
-    grid_indicies = kdtree.query_ball_point(grid_points, outer_cutoff_radius)
+    kdtree = cKDTree(coordinates)
+    grid_indicies = kdtree.query_ball_point(coordinates, outer_cutoff_radius)
 
-    grid_efield = _calculate_electric_field(centered_coordinates, inner_cutoff_radius, grid_indicies, grid_points, charges)
-    return grid_efield, grid_points
+    grid_efield = _calculate_electric_field(coordinates, inner_cutoff_radius, grid_indicies, charges)
+    return grid_efield
 
 
 @numba.jit
-def _calculate_electric_field(centered_coordinates, inner_cutoff_radius, grid_indicies, grid_points, charges):
-    grid_efield = np.zeros(len(grid_points))
-    x_efield,y_efield,z_efield =
-    for i, (indicies, grid_point) in enumerate(zip(grid_indicies, grid_points)):
+def _calculate_electric_field(coordinates, inner_cutoff_radius, grid_indicies,charges):
+    grid_efield = np.zeros(len(coordinates))
+    for i, (indicies, coordinates) in enumerate(zip(grid_indicies, coordinates)):
         for index in indicies:
-            dist = np.linalg.norm(grid_point - centered_coordinates[index])
+            dist = np.linalg.norm(coordinates - coordinates[index])
             if dist > inner_cutoff_radius and outer_cutoff_radius > dist:
-                grid_efield[i] += COLUMB * E2 * charges[index] / (dist*dist)
-                
+                grid_efield[i] += COLUMB * E2 * charges[index] / (dist*dist)                
     return grid_efield
 
 
@@ -80,8 +73,6 @@ if __name__ == "__main__":
     charges = {'Pt': 10, 'Ni': 10, 'P': 5}
     structure = read_structure(input_filename, lattice, charges)
 
-    grid_size = (80, 80, 80)
-    grid_efield, grid_points = calculate_electric_field(structure, inner_cutoff_radius, outer_cutoff_radius, grid=grid_size)
+    grid_efield = calculate_electric_field(structure, inner_cutoff_radius, outer_cutoff_radius)
 
     np.save('data/results/grid_efield.npy', grid_efield)
-    np.save('data/results/grid_points.npy', grid_points)
