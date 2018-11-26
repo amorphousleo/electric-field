@@ -45,6 +45,7 @@ def calculate_electric_field(structure, inner_cutoff=1.0, outer_cutoff=3.0):
     kdtree = cKDTree(coordinates)
     grid_indicies = kdtree.query_ball_point(coordinates, outer_cutoff_radius)
     print("Array Dimensions for grid_indicies", np.shape(grid_indicies))
+    print(grid_indicies[0:9])
     grid_efield = _calculate_electric_field(coordinates, inner_cutoff_radius, grid_indicies, charges)
     return grid_efield
 
