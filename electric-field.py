@@ -37,6 +37,7 @@ def calculate_electric_field(structure, inner_cutoff=1.0, outer_cutoff=3.0):
     np.save('data/results/supercell_structure.npy', supercell_structure.cart_coords)
     np.save('data/results/structure.npy', structure.cart_coords)
     coordinates = supercell_structure.cart_coords  # np array of all coordinates
+    print("Array Dimensions are:", np.shape(coordinates))
     np.save('data/results/coordinates.npy', coordinates)
     charges = np.array([getattr(site.specie, "oxi_state", 0) for site in supercell_structure])
 
