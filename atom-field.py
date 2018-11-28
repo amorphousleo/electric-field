@@ -46,14 +46,22 @@ def kdtree(structure, inner_cutoff_radius=1.0, outer_cutoff_radius=3.0):
     print("Array Dimensions for atom_indicies", np.shape(atom_indicies))
     print("size of atom indicies", len(atom_indicies))
     
-    grid_efield = calculate_electric_field(coordinates,inner_cutoff_radius, atom_indicies, charges)
+    grid_efield = calculate_electric_field(coordinates,supercell_coordinates,inner_cutoff_radius, atom_indicies, charges)
     return grid_efield
     
 @numba.jit
-def calculate_electric_field(coordinates, inner_cutoff_radius, atom_indicies, charges ):
+def calculate_electric_field(coordinates, supercell_coordinates,inner_cutoff_radius, atom_indicies, charges ):
     grid_efield = np.zeros(len(coordinates))
-    for i in coordinates:
-        print(coordinates[i][0:2])
+    
+    #Testing
+    print("Coordinates testing:",coordinates[0])
+    print("Atom Indicies for 0:",atom_indicies[0])
+    #
+    for i in atom_indicies[0]:
+        dist = np.linalg.norm(coordinates[0]-supercell_coordinates[i])
+        if dist < 1.0:
+            grid_efield[i] += COLUMB * E2 * charges[index] / (dist*dist)
+        print(dist)
     return grid_efield
         
 
