@@ -57,10 +57,13 @@ def calculate_electric_field(coordinates, supercell_coordinates,inner_cutoff_rad
     print("Coordinates testing:",coordinates[0])
     print("Atom Indicies for 0:",atom_indicies[0])
     #
-    for i in atom_indicies[0]:
+    for i in coordiantes:
+        for j
         dist = np.linalg.norm(coordinates[0]-supercell_coordinates[i])
+        vector = (coordinates[i])
         if dist < 1.0:
-            grid_efield[i] += COLUMB * E2 * charges[index] / (dist*dist)
+            
+            grid_efield[i] += (COLUMB * E2 * charges[i]) / (dist)
         print(dist)
     return grid_efield
         
