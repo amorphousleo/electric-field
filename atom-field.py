@@ -11,8 +11,8 @@ import numba
 
 # Constants Section 
 # Coulumb Constant : Units : N m^2 C^-2
-COLUMB = 9.0*10**29
-E2 = (1.602*10**-19)**2
+COLUMB = 8.987*10**19
+E = 1.602*10**-19
 
 inner_cutoff_radius = 1.0
 outer_cutoff_radius = 3.0
@@ -55,7 +55,7 @@ def calculate_electric_field(coordinates, supercell_coordinates,inner_cutoff_rad
         for j in atom_indicies[n]:
             dist = np.linalg.norm(coordinates[n]-supercell_coordinates[j])
             if dist > 1.0:
-                grid_efield[n] += ((coordinates[n]-supercell_coordinates[j])*((COLUMB * E2 * charges[n]) / (dist)))
+                grid_efield[n] += ((coordinates[n]-supercell_coordinates[j])*((COLUMB * E * charges[n]) / (dist)))
         n += 1
     return grid_efield
         
@@ -66,7 +66,7 @@ if __name__ == "__main__":
 
     # Construct Structure
     lattice = pmg.Lattice.from_parameters(a, b, c, 90, 90, 90)
-    charges = {'Pt': 10, 'Ni': 10, 'P': 5}
+    charges = {'Pt': 6, 'Ni': 2, 'P': 5}
     structure = read_structure(input_filename, lattice, charges)
 
     grid_efield = kdtree(structure, inner_cutoff_radius, outer_cutoff_radius)
