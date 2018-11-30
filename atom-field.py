@@ -36,35 +36,27 @@ def kdtree(structure, inner_cutoff_radius=1.0, outer_cutoff_radius=3.0):
     offset = np.array([structure.lattice.a, structure.lattice.b, structure.lattice.c])
     supercell_coordinates = supercell_structure.cart_coords - offset #np array of all coordinates
     coordinates = structure.cart_coords
-    print("Shape of coordinates array:",np.shape(coordinates))
+    charges = np.array([getattr(site.specie, "oxi_state", 0) for site in supercell_structure])
     
     # Now build the KTTree
     
     from scipy.spatial import cKDTree
     kdtree = cKDTree(supercell_coordinates)
     atom_indicies = kdtree.query_ball_point(coordinates, outer_cutoff_radius)
-    print("Array Dimensions for atom_indicies", np.shape(atom_indicies))
-    print("size of atom indicies", len(atom_indicies))
-    
     grid_efield = calculate_electric_field(coordinates,supercell_coordinates,inner_cutoff_radius, atom_indicies, charges)
     return grid_efield
     
 @numba.jit
 def calculate_electric_field(coordinates, supercell_coordinates,inner_cutoff_radius, atom_indicies, charges ):
-    grid_efield = np.zeros(len(coordinates))
+    grid_efield = np.zeros([len(coordinates),3])
     
-    #Testing
-    print("Coordinates testing:",coordinates[0])
-    print("Atom Indicies for 0:",atom_indicies[0])
-    #
-    for i in coordiantes:
-        for j
-        dist = np.linalg.norm(coordinates[0]-supercell_coordinates[i])
-        vector = (coordinates[i])
-        if dist < 1.0:
-            
-            grid_efield[i] += (COLUMB * E2 * charges[i]) / (dist)
-        print(dist)
+    n = 0
+    for i in coordinates:
+        for j in atom_indicies[n]:
+            dist = np.linalg.norm(coordinates[n]-supercell_coordinates[j])
+            if dist > 1.0:
+                grid_efield[n] += ((coordinates[n]-supercell_coordinates[j])*((COLUMB * E2 * charges[n]) / (dist)))
+        n += 1
     return grid_efield
         
 
