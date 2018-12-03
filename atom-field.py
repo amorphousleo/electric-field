@@ -15,7 +15,7 @@ COLUMB = 8.987*10**19
 E = 1.602*10**-19
 
 inner_cutoff_radius = 1.0
-outer_cutoff_radius = 3.0
+outer_cutoff_radius = 6.0
 
 def read_structure(filename, lattice, charges):
     # Lattice was not specified in file
@@ -36,7 +36,6 @@ def kdtree(structure, inner_cutoff_radius=1.0, outer_cutoff_radius=3.0):
     offset = np.array([structure.lattice.a, structure.lattice.b, structure.lattice.c])
     supercell_coordinates = supercell_structure.cart_coords - offset #np array of all coordinates
     coordinates = structure.cart_coords
-    np.save('data/results/coordinates.npy', structure.cart_coords) # save coordinates as np array
     charges = np.array([getattr(site.specie, "oxi_state", 0) for site in supercell_structure])
     
     # Now build the KTTree
@@ -45,6 +44,17 @@ def kdtree(structure, inner_cutoff_radius=1.0, outer_cutoff_radius=3.0):
     kdtree = cKDTree(supercell_coordinates)
     atom_indicies = kdtree.query_ball_point(coordinates, outer_cutoff_radius)
     grid_efield = calculate_electric_field(coordinates,supercell_coordinates,inner_cutoff_radius, atom_indicies, charges)
+    
+    # Now output final csv file
+    final_array = np.zeros([len(coordinates),6]) # Array with coordinates and efield values for each atom
+    n = 0 
+    for i in coordinates:
+        final_array[n] = np.append(coordinates[n],grid_efield[n])
+        n += 1
+    
+    e_filename = "D:/Github/electric-field/data/results/efield_sep23.1_cut6ang.csv"
+    comment = "Columns: 1:(x-position), 2:(y-position), 3:(z-position), 4:(x-efield), 5:(y-efield), 6:(z-efield)| Cutoff:{} Angstroms | Units:(position-Angstroms, Electric Field-V/Angstrom)".format(outer_cutoff_radius)
+    np.savetxt(e_filename,final_array,delimiter=',',header=comment)    
     return grid_efield
     
 @numba.jit
@@ -73,3 +83,7 @@ if __name__ == "__main__":
     grid_efield = kdtree(structure, inner_cutoff_radius, outer_cutoff_radius)
 
     np.save('data/results/grid_efield.npy', grid_efield)
+    np.save('data/results/coordinates.npy', structure.cart_coords) # save coordinates as np array
+
+        
+        
