@@ -15,7 +15,7 @@ COLUMB = 8.987*10**19
 E = 1.602*10**-19
 
 inner_cutoff_radius = 1.0
-outer_cutoff_radius = 6.0
+outer_cutoff_radius = 3.0
 
 def read_structure(filename, lattice, charges):
     # Lattice was not specified in file
@@ -28,6 +28,7 @@ def read_structure(filename, lattice, charges):
             species.append(specie)
             positions.append([float(_) for _ in [x, y, z]])
     structure = pmg.Structure(lattice, species, positions, coords_are_cartesian=True)
+    structure.to(filename="data/input/NiPtP.xyz")
     structure.add_oxidation_state_by_element(charges)
     return structure
 
@@ -82,7 +83,7 @@ if __name__ == "__main__":
 
     grid_efield = kdtree(structure, inner_cutoff_radius, outer_cutoff_radius)
 
-    np.save('data/results/grid_efield.npy', grid_efield)
+    np.save('data/results/cut3_grid_efield.npy', grid_efield)
     np.save('data/results/coordinates.npy', structure.cart_coords) # save coordinates as np array
 
         
