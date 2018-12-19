@@ -28,7 +28,7 @@ def read_structure(filename, lattice, charges):
             species.append(specie)
             positions.append([float(_) for _ in [x, y, z]])
     structure = pmg.Structure(lattice, species, positions, coords_are_cartesian=True)
-    structure.to(filename="data/input/NiPtP.xyz")
+    #structure.to(filename="data/input/NiPtP.xyz")
     structure.add_oxidation_state_by_element(charges)
     return structure
 
@@ -37,6 +37,7 @@ def kdtree(structure, inner_cutoff_radius=1.0, outer_cutoff_radius=3.0):
     offset = np.array([structure.lattice.a, structure.lattice.b, structure.lattice.c])
     supercell_coordinates = supercell_structure.cart_coords - offset #np array of all coordinates
     coordinates = structure.cart_coords
+    coordinates_fractional = structure.frac_coords
     charges = np.array([getattr(site.specie, "oxi_state", 0) for site in supercell_structure])
     
     # Now build the KTTree
@@ -47,13 +48,13 @@ def kdtree(structure, inner_cutoff_radius=1.0, outer_cutoff_radius=3.0):
     grid_efield = calculate_electric_field(coordinates,supercell_coordinates,inner_cutoff_radius, atom_indicies, charges)
     
     # Now output final csv file
-    final_array = np.zeros([len(coordinates),6]) # Array with coordinates and efield values for each atom
+    final_array = np.zeros([len(coordinates_fractional),6]) # Array with coordinates and efield values for each atom
     n = 0 
-    for i in coordinates:
-        final_array[n] = np.append(coordinates[n],grid_efield[n])
+    for i in coordinates_fractional:
+        final_array[n] = np.append(coordinates_fractional[n],grid_efield[n])
         n += 1
     
-    e_filename = "D:/Github/electric-field/data/results/efield_sep23.1_cut6ang.csv"
+    e_filename = "D:/Github/electric-field/data/results/efield_sep18.1_cut3ang.csv"
     comment = "Columns: 1:(x-position), 2:(y-position), 3:(z-position), 4:(x-efield), 5:(y-efield), 6:(z-efield)| Cutoff:{} Angstroms | Units:(position-Angstroms, Electric Field-V/Angstrom)".format(outer_cutoff_radius)
     np.savetxt(e_filename,final_array,delimiter=',',header=comment)    
     return grid_efield
@@ -73,8 +74,8 @@ def calculate_electric_field(coordinates, supercell_coordinates,inner_cutoff_rad
         
 
 if __name__ == "__main__":
-    input_filename = "data/input/sep23.1_final_structure_new"
-    a, b, c = 15.341, 15.341, 15.341
+    input_filename = "data/input/sep18.1_final_structure_new"
+    a, b, c = 15.3461, 15.3461, 15.3461
 
     # Construct Structure
     lattice = pmg.Lattice.from_parameters(a, b, c, 90, 90, 90)
